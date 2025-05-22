@@ -1,25 +1,32 @@
 #!/bin/sh
 
-OUTFD=$2  # 显示信息用
+OUTFD=$2  # For displaying messages
 
 ui_print() {
   echo -n -e "ui_print $1\n" > /proc/self/fd/$OUTFD
   echo -n -e "ui_print\n" > /proc/self/fd/$OUTFD
 }
 
-APK_PATH="$MODPATH/ys.apk"
+APK_URL="https://github.com/OukaroMF/Genshin4KSU/releases/latest/download/ys.apk"
+TMP_PATH="/data/local/tmp/ys.apk"
 
-ui_print "[*] installing cloud Genshin..."
+ui_print "[*] Downloading cloud Genshin APK..."
 
-if [ ! -f "$APK_PATH" ]; then
-  ui_print "[!] app not found, please check the file path."
+# Download APK
+if ! curl -fL "$APK_URL" -o "$TMP_PATH" 2>/dev/null; then
+  ui_print "[!] Download failed! Please check your network or the release URL."
   exit 1
 fi
 
-pm install -r "$APK_PATH" 2>/dev/null
+ui_print "[*] Download complete, starting installation..."
+
+# Install APK
+pm install -r "$TMP_PATH" >/dev/null 2>&1
 
 if [ $? -eq 0 ]; then
-  ui_print "[+] Enjoy your cloud Genshin!"
+  ui_print "[✓] Cloud Genshin installed successfully!"
+  # Optionally remove the APK after installation
+  rm -f "$TMP_PATH"
 else
-  ui_print "[!] Failed to install the app."
+  ui_print "[!] Installation failed, maybe due to insufficient permissions or incompatible APK."
 fi
